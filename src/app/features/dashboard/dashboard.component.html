@@ -1,0 +1,117 @@
+<header class="topbar">
+  <div class="topbar__inner">
+    <a class="brand" href="#/dashboard">
+      <span class="brand__mark" aria-hidden="true">W</span>
+      <span class="brand__text">Sandbox Wallet</span>
+    </a>
+    <div class="topbar__right">
+      <span class="pill" [class.pill--offline]="!network.online()">
+        <span class="pill__dot" aria-hidden="true"></span>
+        {{ network.online() ? 'Online' : 'Offline' }}
+      </span>
+      <span class="topbar__user">{{ auth.user()?.displayName }}</span>
+      <button type="button" class="btn btn--ghost" (click)="logout()">Sign out</button>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="page" tabindex="-1">
+  <p class="mock-note" role="note">
+    Sandbox environment &middot; all credentials are mock data, not real identity documents.
+  </p>
+
+  <section aria-labelledby="creds-heading">
+    <div class="section-head">
+      <div>
+        <h1 id="creds-heading">Your credentials</h1>
+        @if (syncedAt(); as at) {
+          <p class="muted">Last synced {{ at | date: 'medium' }}</p>
+        }
+      </div>
+      @if (view().kind === 'loaded' || view().kind === 'empty') {
+        <button
+          type="button"
+          class="btn"
+          (click)="refresh()"
+          [disabled]="refreshing()"
+          [attr.aria-busy]="refreshing()"
+        >
+          {{ refreshing() ? 'Refreshing…' : 'Refresh' }}
+        </button>
+      }
+    </div>
+
+    @if (source() === 'cache' && view().kind === 'loaded') {
+      <div class="banner banner--info" role="status">
+        <strong>You're offline.</strong> Showing the credentials saved on this device{{
+          syncedAt() ? ' on ' + (syncedAt() | date: 'medium') : ''
+        }}.
+      </div>
+    }
+
+    @switch (view().kind) {
+      @case ('loading') {
+        <div role="status" aria-live="polite">
+          <span class="visually-hidden">Loading your credentials…</span>
+        </div>
+        <ul class="grid" aria-hidden="true" data-testid="loading-state">
+          @for (s of skeletons; track s) {
+            <li class="card card--skeleton"><span></span><span></span><span></span></li>
+          }
+        </ul>
+      }
+
+      @case ('error') {
+        <div class="state state--error" role="alert" data-testid="error-state">
+          <h2>Couldn't load your credentials</h2>
+          <p>{{ errorMessage() }}</p>
+          <button type="button" class="btn btn--primary" (click)="retry()">Try again</button>
+        </div>
+      }
+
+      @case ('empty') {
+        <div class="state" data-testid="empty-state">
+          <h2>No credentials yet</h2>
+          <p>When an issuer shares a verifiable credential with you, it will appear here.</p>
+        </div>
+      }
+
+      @case ('loaded') {
+        @if (loaded(); as v) {
+          @if (v.staleError; as err) {
+            <div class="banner banner--warn" role="alert">
+              {{ err }} Showing the last loaded credentials.
+              <button type="button" class="btn btn--link" (click)="retry()">Try again</button>
+            </div>
+          }
+          <p class="visually-hidden" role="status">
+            {{ v.credentials.length }} credentials loaded.
+          </p>
+          <ul class="grid" data-testid="credential-list">
+            @for (credential of v.credentials; track credential.id) {
+              <li><app-credential-card [credential]="credential" /></li>
+            }
+          </ul>
+        }
+      }
+    }
+  </section>
+
+  <details class="sandbox-controls">
+    <summary>Sandbox controls (for reviewers)</summary>
+    <label for="mock-scenario">Mock API response for <code>GET /api/credentials</code></label>
+    <select
+      id="mock-scenario"
+      [value]="mock.scenario()"
+      (change)="setScenario($any($event.target).value)"
+    >
+      @for (s of scenarios; track s) {
+        <option [value]="s">{{ s }}</option>
+      }
+    </select>
+    <p class="muted">
+      Tip: load the list once on <em>success</em>, then switch DevTools &rarr; Network to
+      <em>Offline</em> and press Refresh to see the Service Worker serve the cached list.
+    </p>
+  </details>
+</main>

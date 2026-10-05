@@ -1,0 +1,59 @@
+<div class="sdm__row">
+  <span class="sdm__value" [id]="ids.value" translate="no">
+    @if (plainValue(); as plain) {
+      <span class="sdm__text" data-testid="sdm-value">{{ plain }}</span>
+    } @else {
+      <span class="sdm__text" data-testid="sdm-value" aria-hidden="true">{{ masked() }}</span>
+      <span class="visually-hidden">{{ label() }} hidden. Ends in {{ spokenTail() }}.</span>
+    }
+  </span>
+
+  <button
+    type="button"
+    class="sdm__btn"
+    (click)="toggle()"
+    [attr.aria-controls]="ids.value"
+    [attr.aria-describedby]="ids.hint"
+    [attr.aria-label]="actionText() + ' ' + label()"
+  >
+    <svg
+      class="sdm__icon"
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      aria-hidden="true"
+      focusable="false"
+    >
+      @if (isRevealed()) {
+        <path
+          d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.9 5.1A9.8 9.8 0 0112 5c5 0 9 4.5 10 7-.4 1-1.2 2.3-2.4 3.5M6.6 6.6C4.6 7.9 3.1 9.9 2 12c1 2.5 5 7 10 7 1.7 0 3.3-.5 4.6-1.3"
+        />
+      } @else {
+        <path d="M2 12c1-2.5 5-7 10-7s9 4.5 10 7c-1 2.5-5 7-10 7S3 14.5 2 12z" />
+        <circle cx="12" cy="12" r="3" />
+      }
+    </svg>
+    <span>{{ actionText() }}</span>
+  </button>
+</div>
+
+<p class="sdm__hint" [id]="ids.hint">
+  Shown for {{ durationSeconds() }} seconds, then hidden automatically.
+</p>
+
+@if (isRevealed()) {
+  <div class="sdm__timer" aria-hidden="true">
+    <div class="sdm__bar" [style.animation-duration.ms]="revealDurationMs()"></div>
+    <span class="sdm__countdown">Hiding in {{ secondsLeft() }}s</span>
+  </div>
+}
+
+<div
+  class="visually-hidden"
+  role="status"
+  aria-live="polite"
+  aria-atomic="true"
+  data-testid="sdm-live"
+>
+  {{ announcement() }}
+</div>

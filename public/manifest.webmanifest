@@ -1,0 +1,15 @@
+{
+  "name": "Sandbox Credential Wallet",
+  "short_name": "Wallet",
+  "description": "Verifiable Credential Wallet PWA for the identity Sandbox (mock data).",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#0b5cab",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
